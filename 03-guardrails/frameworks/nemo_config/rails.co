@@ -1,0 +1,11 @@
+define flow check prompt injection
+  $is_injection = execute check_prompt_injection
+  if $is_injection
+    bot refuse to respond
+    stop
+
+define bot refuse to respond
+  "I can't help with that request."
+
+define flow redact secret
+  $bot_message = execute redact_secret(text=$bot_message)

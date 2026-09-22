@@ -1,0 +1,4 @@
+guardrails-ai>=0.11.0
+nemoguardrails>=0.24.0
+groq>=0.30.0
+python-dotenv>=1.0.0
