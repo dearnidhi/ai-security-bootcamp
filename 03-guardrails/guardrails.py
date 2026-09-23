@@ -1,10 +1,10 @@
 """
-Guardrails — 4 safety checks for AI apps in one file.
+Guardrails - 4 safety checks for AI apps in one file.
 
-1. InputGuardrail   — checks user input BEFORE the AI sees it
-2. OutputGuardrail  — checks AI response BEFORE the user sees it
-3. TopicalGuardrail — keeps the AI on-topic
-4. AgenticGuardrail — controls which tools an AI agent can use
+1. InputGuardrail   - checks user input BEFORE the AI sees it
+2. OutputGuardrail  - checks AI response BEFORE the user sees it
+3. TopicalGuardrail - keeps the AI on-topic
+4. AgenticGuardrail - controls which tools an AI agent can use
 """
 
 import re
@@ -174,7 +174,7 @@ class AgenticGuardrail:
             result["allowed"] = True
             if TOOL_REGISTRY[tool_name] == RiskLevel.HIGH and self.require_human_approval:
                 result["requires_human_approval"] = True
-                result["reason"] = "HIGH risk — requires human approval before execution"
+                result["reason"] = "HIGH risk - requires human approval before execution"
             else:
                 result["reason"] = "Action approved"
 

@@ -16,11 +16,11 @@ st.caption(
 )
 
 IDENTITIES = {
-    "Legal — Admin": "sk-legal-admin-001",
-    "Legal — Analyst": "sk-legal-analyst-002",
-    "Finance — Analyst": "sk-finance-analyst-003",
-    "Finance — Viewer": "sk-finance-viewer-004",
-    "HR — Viewer": "sk-hr-viewer-005",
+    "Legal - Admin": "sk-legal-admin-001",
+    "Legal - Analyst": "sk-legal-analyst-002",
+    "Finance - Analyst": "sk-finance-analyst-003",
+    "Finance - Viewer": "sk-finance-viewer-004",
+    "HR - Viewer": "sk-hr-viewer-005",
 }
 TENANTS = ["legal", "finance", "hr"]
 
@@ -32,7 +32,7 @@ st.sidebar.code(api_key, language=None)
 mode = st.sidebar.radio("2. Gateway mode", ["Vulnerable", "Secure"])
 
 st.subheader("3. Send a query")
-own_tenant = identity_label.split(" — ")[0].lower()
+own_tenant = identity_label.split(" - ")[0].lower()
 tenant_id = st.selectbox(
     "tenant_id to request (try picking a DIFFERENT tenant than your own login!)",
     TENANTS,
@@ -63,12 +63,12 @@ if st.button("Send Query", type="primary"):
         if mode == "Vulnerable" and tenant_id != own_tenant:
             st.error(
                 f"🚨 LEAK: you are logged in as **{own_tenant}** but got **{tenant_id}**'s "
-                "confidential data — the backend trusted your tenant_id claim without checking it."
+                "confidential data - the backend trusted your tenant_id claim without checking it."
             )
         if mode == "Secure" and data.get("cross_tenant_attempt_blocked"):
             st.warning(
                 f"🛡️ Blocked: you tried to claim tenant **{tenant_id}**, but the gateway ignored "
-                f"that and served your real tenant (**{own_tenant}**) instead — no leak."
+                f"that and served your real tenant (**{own_tenant}**) instead - no leak."
             )
 
 st.divider()

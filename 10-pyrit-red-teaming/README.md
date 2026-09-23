@@ -1,4 +1,4 @@
-# 11 — AI Red Teaming with PyRIT
+# 10 - AI Red Teaming with PyRIT
 
 Attack your own AI with Microsoft's **PyRIT**, score the results, and track an **Attack Success Rate (ASR)**.
 

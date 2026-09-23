@@ -1,6 +1,6 @@
 # Multi-Model Chatbot API
 
-FastAPI chatbot that routes through a **LiteLLM gateway** using two **Groq** models — `qwen/qwen3.8-27b` (primary, bigger) and `openai/gpt-oss-20b` (fallback, smaller). Retries, timeout, fallback, and caching all happen in the LiteLLM `Router` in `main.py` — the API routes never know which model answered.
+FastAPI chatbot that routes through a **LiteLLM gateway** using two **Groq** models - `qwen/qwen3.8-27b` (primary, bigger) and `openai/gpt-oss-20b` (fallback, smaller). Retries, timeout, fallback, and caching all happen in the LiteLLM `Router` in `main.py` - the API routes never know which model answered.
 
 ## Setup
 
@@ -32,8 +32,8 @@ uvicorn main:app --reload
 
 ## What the gateway does (`main.py`)
 
-- **Fallback** — if the primary (27b) model fails, automatically retries on the fallback (20b) model
-- **Retries** — up to 2 attempts per model before falling back
-- **Timeout** — 10s hard limit per request
-- **Cooldown** — a failing model is skipped for 5s before being retried
-- **Caching** — identical non-streaming prompts are served from cache, $0 cost
+- **Fallback** - if the primary (27b) model fails, automatically retries on the fallback (20b) model
+- **Retries** - up to 2 attempts per model before falling back
+- **Timeout** - 10s hard limit per request
+- **Cooldown** - a failing model is skipped for 5s before being retried
+- **Caching** - identical non-streaming prompts are served from cache, $0 cost

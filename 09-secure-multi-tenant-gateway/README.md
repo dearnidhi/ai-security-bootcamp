@@ -1,13 +1,13 @@
-# 10 — Secure Multi-Tenant AI Gateway (IDOR/BOLA Case Study)
+# 09 - Secure Multi-Tenant AI Gateway (IDOR/BOLA Case Study)
 
 Three departments (legal, finance, hr) share one AI backend. Each API key belongs to exactly
 one tenant + role. This demo shows what happens when a request's `tenant_id` doesn't match
-what the API key actually owns — and how to fix it.
+what the API key actually owns - and how to fix it.
 
 ## The vulnerability
 
-This is a **Broken Object-Level Authorization (BOLA/IDOR)** flaw — OWASP API Security Top 10,
-API1:2023 — applied to an AI backend instead of a typical REST API. It maps directly onto
+This is a **Broken Object-Level Authorization (BOLA/IDOR)** flaw - OWASP API Security Top 10,
+API1:2023 - applied to an AI backend instead of a typical REST API. It maps directly onto
 **OWASP LLM02: Sensitive Information Disclosure** and the general idea of **tenant isolation**
 from the Secure AI Architecture module.
 
@@ -16,7 +16,7 @@ from the Secure AI Architecture module.
   claim `tenant_id=legal`, and you get Legal's confidential data.
 - **Secure mode**: the backend derives the tenant *only* from the authenticated API key's own
   record. Any mismatched `tenant_id` claim is ignored and logged as a possible attack attempt
-  — no leak, no matter what the client sends.
+  - no leak, no matter what the client sends.
 
 ## Also demonstrates
 

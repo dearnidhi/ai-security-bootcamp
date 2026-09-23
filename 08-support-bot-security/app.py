@@ -60,6 +60,6 @@ if st.button("Send", type="primary"):
     if n > 1:
         st.error(f"🚩 Evaluator: {n} different customers' data was accessed in one request.")
     elif n == 1:
-        st.success("✅ Evaluator: Only 1 order accessed — no excessive disclosure.")
+        st.success("✅ Evaluator: Only 1 order accessed - no excessive disclosure.")
     else:
         st.info("No orders were accessed (request was blocked).")

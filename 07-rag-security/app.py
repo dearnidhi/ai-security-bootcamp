@@ -47,6 +47,6 @@ if st.button("Ask the AI", type="primary"):
     v = data["verification"]
     st.subheader("Security check")
     if v.get("contradicts"):
-        st.error(f"🚩 Wrong answer detected — {v.get('reason')}")
+        st.error(f"🚩 Wrong answer detected - {v.get('reason')}")
     else:
-        st.success(f"✅ Answer is correct — {v.get('reason')}")
+        st.success(f"✅ Answer is correct - {v.get('reason')}")

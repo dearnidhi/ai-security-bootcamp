@@ -11,7 +11,7 @@ load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 MODEL = "openai/gpt-oss-20b"
 
-app = FastAPI(title="Secure Multi-Tenant AI Gateway — IDOR/BOLA Case Study")
+app = FastAPI(title="Secure Multi-Tenant AI Gateway - IDOR/BOLA Case Study")
 
 # --- Identity store (simulates an identity provider / API key vault) ---
 API_KEYS = {
@@ -85,7 +85,7 @@ class QueryRequest(BaseModel):
 
 @app.post("/vulnerable/query")
 def vulnerable_query(req: QueryRequest):
-    """BUG: only checks that the API key is valid — then trusts the client-supplied
+    """BUG: only checks that the API key is valid - then trusts the client-supplied
     tenant_id to decide whose confidential data to use. This is a Broken Object-Level
     Authorization (BOLA/IDOR) flaw: identity is authenticated, but the requested
     OBJECT (tenant's data) is never checked against that identity."""
@@ -108,7 +108,7 @@ def vulnerable_query(req: QueryRequest):
 @app.post("/secure/query")
 def secure_query(req: QueryRequest):
     """FIX: tenant is derived ONLY from the authenticated api_key's own record.
-    Any client-supplied tenant_id is treated as an untrusted claim — if it doesn't
+    Any client-supplied tenant_id is treated as an untrusted claim - if it doesn't
     match, the request still succeeds using the REAL tenant, and the mismatch is
     logged as a possible attack attempt."""
     identity = API_KEYS.get(req.api_key)
@@ -141,7 +141,7 @@ def secure_query(req: QueryRequest):
 @app.get("/secure/audit-log")
 def audit_log(api_key: str):
     """Admin-only, and tenant-scoped: an admin only ever sees their OWN tenant's
-    audit trail — tenant isolation applies to the audit log too."""
+    audit trail - tenant isolation applies to the audit log too."""
     identity = API_KEYS.get(api_key)
     if not identity or identity["role"] != "admin":
         log_event(api_key=mask(api_key), mode="secure", allowed=False,

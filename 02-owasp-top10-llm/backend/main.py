@@ -13,7 +13,7 @@ app = FastAPI(title="Prompt Injection Scanner")
 
 # Each attack either tries to make the AI say a specific "marker" phrase
 # (proving it broke its rules), or tries to make it leak its own system
-# prompt back. Both are simple, explainable checks — no judge model needed.
+# prompt back. Both are simple, explainable checks - no judge model needed.
 ATTACKS = [
     {
         "name": "Direct Override",

@@ -1,4 +1,4 @@
-# 02 — OWASP Top 10 for LLMs
+# 02 - OWASP Top 10 for LLMs
 
 A prompt injection scanner that fires 8 real attacks at any system prompt and gives it a security score out of 10.
 
@@ -45,6 +45,6 @@ streamlit run app.py
 
 | File | What it does |
 |------|-------------|
-| `backend/main.py` | FastAPI `/scan` endpoint — 8 attacks, scoring logic |
-| `app.py` | Streamlit UI — paste prompt, see score + per-attack breakdown |
+| `backend/main.py` | FastAPI `/scan` endpoint - 8 attacks, scoring logic |
+| `app.py` | Streamlit UI - paste prompt, see score + per-attack breakdown |
 | `owasp_top10_explained.ipynb` | OWASP Top 10 for LLMs explained simply |

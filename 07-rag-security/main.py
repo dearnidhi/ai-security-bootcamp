@@ -11,7 +11,7 @@ load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 MODEL = "openai/gpt-oss-20b"
 
-app = FastAPI(title="RAG Security Demo — Poisoned Expense Policy")
+app = FastAPI(title="RAG Security Demo - Poisoned Expense Policy")
 
 TRUSTED_DOCS = [
     "Company Expense Policy: All employees must submit receipts within 30 days of purchase.",

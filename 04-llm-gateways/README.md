@@ -1,6 +1,6 @@
-# 04 — LLM Gateways
+# 04 - LLM Gateways
 
-A gateway is a layer between your app and the LLM provider that adds retries, fallback, caching, and cost tracking — without changing your business logic.
+A gateway is a layer between your app and the LLM provider that adds retries, fallback, caching, and cost tracking - without changing your business logic.
 
 ## What's covered
 

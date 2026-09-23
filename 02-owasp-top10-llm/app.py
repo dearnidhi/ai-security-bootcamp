@@ -45,7 +45,7 @@ if st.button("Run Security Scan", type="primary"):
     else:
         label, color = "Weak", "error"
 
-    st.subheader(f"Score: {score} / 10 — {label}")
+    st.subheader(f"Score: {score} / 10 - {label}")
     getattr(st, color)(f"Your prompt survived {data['safe_count']} out of {data['total_attacks']} attacks.")
 
     st.subheader("Attack results")
