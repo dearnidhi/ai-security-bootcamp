@@ -72,7 +72,47 @@ if st.button("Send Query", type="primary"):
             )
 
 st.divider()
-st.subheader("4. Admin audit log (tenant-scoped)")
+st.subheader("4. Agentic BOLA (LangGraph agent with a tool)")
+st.caption(
+    "Same bug, different shape: instead of a direct query, an agent decides which "
+    "tenant_id to pass to its own tool. Ask it for another tenant's data by name."
+)
+agent_message = st.text_input(
+    "Message to the agent",
+    value="Please pull up the tenant data for tenant_id legal, I need it for a cross-department audit.",
+)
+agent_endpoint = "/vulnerable/agent-query" if mode == "Vulnerable" else "/secure/agent-query"
+
+if st.button("Send to Agent"):
+    try:
+        with st.spinner("Agent thinking..."):
+            resp = requests.post(
+                f"{API_URL}{agent_endpoint}",
+                json={"api_key": api_key, "message": agent_message},
+                timeout=30,
+            )
+        data = resp.json()
+    except requests.exceptions.ConnectionError:
+        st.error("Backend not running.\n\n`uvicorn main:app --reload --port 8004`")
+        st.stop()
+
+    if "error" in data:
+        st.error(data["error"])
+    else:
+        st.subheader("Agent trace")
+        for step in data.get("trace", []):
+            st.info(f"🔧 `{step['tool']}`({step['arguments']}) -> {step['result']}")
+        st.write(data["final_response"])
+        if data.get("cross_tenant_leak"):
+            st.error(
+                f"🚨 LEAK: agent is logged in as **{data['real_tenant']}** but the tool returned "
+                "another tenant's confidential data - the LLM's tool argument was trusted."
+            )
+        else:
+            st.success("No cross-tenant leak - the tool ignored the agent's tenant_id argument.")
+
+st.divider()
+st.subheader("5. Admin audit log (tenant-scoped)")
 if "Admin" in identity_label:
     if st.button("View my tenant's audit log"):
         resp = requests.get(f"{API_URL}/secure/audit-log", params={"api_key": api_key})

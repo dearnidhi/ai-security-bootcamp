@@ -34,17 +34,14 @@ Tip: do not put the exact refusal sentence inside the prompt. The leak check fla
 ..\venv\Scripts\activate
 copy .env.example .env    # add GROQ_API_KEY
 
-# Terminal 1
-uvicorn backend.main:app --reload --port 8088
-
-# Terminal 2
 streamlit run app.py
 ```
+
+One command, one file - no separate backend to start.
 
 ## Files
 
 | File | What it does |
 |------|-------------|
-| `backend/main.py` | FastAPI `/scan` endpoint - 8 attacks, scoring logic |
-| `app.py` | Streamlit UI - paste prompt, see score + per-attack breakdown |
+| `app.py` | Streamlit app: the 8 attacks, scoring logic, and UI, all in one file |
 | `owasp_top10_explained.ipynb` | OWASP Top 10 for LLMs explained simply |

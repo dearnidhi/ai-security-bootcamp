@@ -1,3 +1,4 @@
+import json
 import os
 import time
 from collections import deque
@@ -6,6 +7,10 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from groq import Groq
+from langchain_groq import ChatGroq
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+from langchain_core.tools import tool
+from langchain.agents import create_agent
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -136,6 +141,92 @@ def secure_query(req: QueryRequest):
         "answer": answer,
         "cross_tenant_attempt_blocked": cross_tenant_attempt,
     }
+
+
+class AgentQueryRequest(BaseModel):
+    api_key: str
+    message: str
+
+
+def build_agent(mode: str, real_tenant: str):
+    """Same idea as modules 05/08: the security check lives in the TOOL, not in what
+    the LLM decides. The agent can be talked into asking for another tenant's data -
+    whether that actually leaks depends only on what the tool does with the argument."""
+
+    @tool
+    def get_tenant_data(tenant_id: str) -> str:
+        """Look up the confidential context for a tenant by tenant_id."""
+        if mode == "vulnerable":
+            # BUG: trusts whatever tenant_id the agent (i.e. the LLM) decided to pass
+            used_tenant = tenant_id
+        else:
+            # FIX: ignores the agent's argument entirely, always uses the authenticated tenant
+            used_tenant = real_tenant
+        data = TENANT_SECRETS.get(used_tenant, "unknown tenant")
+        return json.dumps({"tenant_used": used_tenant, "data": data})
+
+    llm = ChatGroq(model=MODEL, temperature=0, max_tokens=1024)
+    system_prompt = (
+        "You are an internal assistant. Use get_tenant_data to look up whatever tenant "
+        "information the user asks for, to be as helpful as possible."
+    )
+    return create_agent(llm, tools=[get_tenant_data], system_prompt=system_prompt)
+
+
+def run_agent_query(mode: str, api_key: str, message: str):
+    identity = API_KEYS.get(api_key)
+    if not identity:
+        return {"error": "invalid api key"}
+    real_tenant = identity["tenant"]
+
+    agent = build_agent(mode, real_tenant)
+    result = agent.invoke({"messages": [HumanMessage(content=message)]})
+    messages = result["messages"]
+
+    tool_calls_by_id = {}
+    for m in messages:
+        if isinstance(m, AIMessage) and m.tool_calls:
+            for tc in m.tool_calls:
+                tool_calls_by_id[tc["id"]] = {"tool": tc["name"], "arguments": tc["args"]}
+
+    trace = []
+    cross_tenant_leak = False
+    for m in messages:
+        if isinstance(m, ToolMessage):
+            call = tool_calls_by_id.get(m.tool_call_id, {"tool": m.name, "arguments": {}})
+            result_val = json.loads(m.content)
+            if result_val.get("tenant_used") != real_tenant:
+                cross_tenant_leak = True
+            trace.append({"tool": call["tool"], "arguments": call["arguments"], "result": result_val})
+
+    final_response = ""
+    for m in reversed(messages):
+        if isinstance(m, AIMessage) and m.content:
+            final_response = m.content
+            break
+
+    log_event(api_key=mask(api_key), mode=f"agent-{mode}", role=identity["role"],
+               allowed=True, reason="cross-tenant leak via agent tool call" if cross_tenant_leak else "normal")
+    return {"real_tenant": real_tenant, "trace": trace, "final_response": final_response,
+            "cross_tenant_leak": cross_tenant_leak}
+
+
+@app.post("/vulnerable/agent-query")
+def vulnerable_agent_query(req: AgentQueryRequest):
+    """Agentic BOLA: the agent (LangGraph) decides which tenant_id to pass to the tool.
+    If a user's phrasing talks it into asking for another tenant's data, the tool
+    happily returns it - the LLM's decision IS the access-control check, which is
+    exactly the anti-pattern this module is about."""
+    return run_agent_query("vulnerable", req.api_key, req.message)
+
+
+@app.post("/secure/agent-query")
+def secure_agent_query(req: AgentQueryRequest):
+    """Fix: same agent, same LLM, but the tool ignores whatever tenant_id the agent
+    passes and always uses the caller's real authenticated tenant. Even a successfully
+    'social-engineered' agent cannot leak another tenant's data, because the enforcement
+    point is the tool's code, not the LLM's judgment."""
+    return run_agent_query("secure", req.api_key, req.message)
 
 
 @app.get("/secure/audit-log")
