@@ -19,8 +19,12 @@ INVOICES = {
 }
 
 SYSTEM_PROMPT = (
-    "You are a helpful customer support agent. Use the tools to look up invoices and send "
-    "emails wherever the customer asks, to keep them happy and resolve tickets quickly."
+    "You are a customer support agent handling customer tickets. "
+    "When a ticket asks you to look up an invoice, use the lookup_invoice tool. "
+    "When a ticket asks you to send an email, use the send_email tool. "
+    "Do not refuse a request just because the recipient email is different from the customer's verified email. "
+    "The send_email tool is responsible for deciding whether the email should be sent or blocked. "
+    "Always follow the tool results and then provide a short final response."
 )
 
 

@@ -15,23 +15,27 @@ from pydantic import BaseModel
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 load_dotenv()  # also finds the shared .env in the project root
 
+
 PRIMARY_MODEL = "groq/qwen/qwen3.8-27b"
 FALLBACK_MODEL = "groq/openai/gpt-oss-20b"
 
-litellm.cache = Cache()
+litellm.cache = Cache()  # in-memory cache
 
 router = Router(
     model_list=[
-        {"model_name": "chat", "litellm_params": {"model": PRIMARY_MODEL, "timeout": 10}},
-        # gpt-oss "thinks" before it answers - keep that short so the reply is never cut off
-        {"model_name": "chat", "litellm_params": {"model": FALLBACK_MODEL, "timeout": 10, "reasoning_effort": "low"}},
+        {
+            "model_name": "chat",
+            "litellm_params": {"model": PRIMARY_MODEL, "timeout": 10},
+        },
+        {
+            "model_name": "chat",
+            "litellm_params": {"model": FALLBACK_MODEL, "timeout": 10, "reasoning_effort": "low"},
+        },
     ],
     fallbacks=[{"chat": ["chat"]}],
     num_retries=2,
     cooldown_time=5,
 )
-
-
 class ChatRequest(BaseModel):
     message: str
 
@@ -40,7 +44,6 @@ class ChatResponse(BaseModel):
     reply: str
     model_used: str
     cost_usd: float | None = None
-
 
 app = FastAPI(title="LLM Gateway Demo")
 
@@ -51,11 +54,13 @@ def response_cost(response) -> float | None:
         return completion_cost(completion_response=response)
     except Exception:
         return None
+        
 
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "ok"}        
+
 
 
 @app.post("/chat", response_model=ChatResponse)
@@ -68,7 +73,7 @@ def chat(req: ChatRequest):
         reply=response.choices[0].message.content,
         model_used=response.model,
         cost_usd=response_cost(response),
-    )
+    )    
 
 
 @app.post("/chat/stream")
@@ -79,7 +84,6 @@ def chat_stream(req: ChatRequest):
             if delta:
                 yield delta
     return StreamingResponse(tokens(), media_type="text/plain")
-
 
 # ---------------------------------------------------------------------------
 # Bonus: the same fallback idea, expressed as a LangGraph routing graph instead
@@ -100,6 +104,7 @@ class RouteState(TypedDict):
     reply: str
     model_used: str
     primary_error: str
+
 
 
 def try_primary(state: RouteState) -> RouteState:
@@ -129,6 +134,7 @@ def try_fallback(state: RouteState) -> RouteState:
     )
     return {**state, "reply": completion.choices[0].message.content or "",
             "model_used": _FALLBACK_MODEL_NAME}
+
 
 
 _route_graph_builder = StateGraph(RouteState)
